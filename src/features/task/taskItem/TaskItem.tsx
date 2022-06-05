@@ -1,8 +1,18 @@
 import React from "react";
+import { useDispatch, useSelector } from "react-redux";
 import Checkbox from "@mui/material/Checkbox";
+import Modal from "@mui/material/Modal";
 import EventNoteIcon from "@mui/icons-material/EventNote";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import TaskForm from "../taskForm/TaskForm";
+import {
+  selectTask,
+  deleteTask,
+  completeTask,
+  handleModalOpen,
+  selectIsModalOpen,
+} from "../taskSlice";
 import styles from "./TaskItem.module.scss";
 
 interface PropTypes {
@@ -10,6 +20,15 @@ interface PropTypes {
 }
 
 const TaskItem: React.FC<PropTypes> = ({ task }) => {
+  const isModalOpen = useSelector(selectIsModalOpen);
+  const dispatch = useDispatch();
+  const handleOpen = () => {
+    dispatch(selectTask(task));
+    dispatch(handleModalOpen(true));
+  };
+  const handleClose = () => {
+    dispatch(handleModalOpen(false));
+  };
   return (
     <div className={styles.root}>
       <div className={styles.title}>
@@ -19,22 +38,25 @@ const TaskItem: React.FC<PropTypes> = ({ task }) => {
       <div className={styles.right_item}>
         <Checkbox
           checked={task.completed}
-          onClick={() => console.log(`check ${task.id}`)}
+          onClick={() => dispatch(completeTask(task))}
           className={styles.checkbox}
         />
-        <button
-          onClick={() => console.log(`edit ${task.id}`)}
-          className={styles.edit_button}
-        >
+        <button onClick={handleOpen} className={styles.edit_button}>
           <EditIcon className={styles.icon} />
         </button>
         <button
-          onClick={() => console.log(`delete ${task.id}`)}
+          onClick={() => dispatch(deleteTask(task))}
           className={styles.delete_button}
         >
           <DeleteIcon className={styles.icon} />
         </button>
       </div>
+      <Modal open={isModalOpen} onClose={handleClose} className={styles.modal}>
+        <div className={styles.modal_content}>
+          <div className={styles.modal_title}>Edit</div>
+          <TaskForm edit />
+        </div>
+      </Modal>
     </div>
   );
 };
